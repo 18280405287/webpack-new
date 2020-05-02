@@ -1,0 +1,91 @@
+1 安装webpack
+    1.1 全局安装 npm i webpack webpack-cli -g
+        1.1.1 可以直接使用 webpack 命令
+    1.2 项目中依赖安装(推荐) npm i webpack webpack-cli -D
+        1.2.1 不能直接使用 webpack 命令,需手动设置 package->scripts,
+        通过 npm run <指令> 启动  如:npm run dev
+        1.2.2 可以指定配置文件的package->scripts
+        "dev":webpack-dev-server --config scripts/webpack.config.js
+        (现在配饰文件就在 项目根目录的 ->script文件中; 但是会出现出口文件会出现问题)
+        (使用 process.cwd() -->指的是项目根目录;__dirname 和 ./ --->指的是当前文件目录)
+
+2 设置webpack.config.js配置文件
+    2.1 在配置文件中暴露一个配置对象对象
+        2.1.1 module.exports={} --->(这是node.js向外暴露对象的方式)
+        2.1.2 拓展暴露和引入方式:
+        module.exports ---> const a = require('')
+        export default --->import '' | import a from '' | import {a} from ''
+        其中{}的是按需引入,接收名不可更改
+
+    2.2 设置打包模式(***必填)
+        2.2.1 development 生产环境
+        2.2.2 production 开发环境
+            可以写在module.exports={}里,也可以写在package->scripts里(--mode production)
+
+    2.3 设置入口文件(obj->entry)
+        2.3.1 先引入 node 原生路径
+        const path = require('path')
+        2.3.2 写入口文件,如下写法
+        entry: {
+            app: './src/app.js',
+            search: './src/search.js'
+          }
+
+    2.4 设置出口文件
+    output: {
+        filename: 'static/js[name].js', //重点***********他会自动帮我们创建static文件夹套js文件夹，里面放.js文件
+        path: __dirname + '/dist'
+        //相对当前文件夹拼接绝对路径 path.resolve(__dirname,'dist')
+        //真正的项目根目录拼接绝对路劲 path.resove(process.cwd())
+        //process.cwd() 是当前执行node命令时候的文件夹地址 ——工作目录，保证了文件在不同的目录下执行时，路径始终不变
+        //__dirname 是被执行的js 文件的地址 ——文件所在目录
+      }
+
+    2.5 插件plugins
+    plugins:[
+            //这是给public/index.html打包后引入index.js
+            new HtmlWebpackPlugin({
+                title:'webpack',
+                template:'public/index.html'
+            })
+        ]
+
+    2.6 loader 第三方加载 后写的先执行
+     module: {
+        rules: [
+          { test: /\.txt$/, use: 'raw-loader' },
+          {
+                  test: /\.css$/,
+                  use: [
+                  //后写的先执行
+                    { loader: "style-loader/url" },
+                    { loader: "file-loader" }
+                  ]
+                }
+        ]
+      }
+
+      2.7 处理css打包 cnpm i style-loader css-loader -D
+
+      2.8 迷你CSS提取插件 cnpm i mini-css-extract-plugin -D
+      （该插件将CSS提取到单独的文件中。它为每个包含CSS的JS文件创建一个CSS文件。它支持CSS和SourceMap的按需加载。
+
+       它基于新的webpack v4功能（模块类型）构建，并且需要webpack 4才能正常工作。
+
+       与extract-text-webpack-plugin相比：
+
+       异步加载
+       没有重复的编译（性能）
+       更容易使用）
+
+       2.9 自动化打包 webpack-dev-server   cnpm i webpack-dev-server -D
+
+       2.10 安装 less   cnpm i less-loader less -D
+
+       2.11 安装 postcss-loader autoprefixer   cnpm i postcss-loader autoprefixer -D
+       自动给css加前缀   browserslist 写在package文件中 如
+       "browserlist":{
+            "cover 99.5%"
+       }
+       作用就是兼容更多,原理,检查你使用属性的兼容性
+
